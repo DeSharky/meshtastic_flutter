@@ -2,12 +2,12 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:logger/logger.dart';
+import 'package:logger/logger.dart' as Logger_orig;
+import 'package:logger/web.dart';
 import 'package:meshtastic_flutter/model/mesh_data_model.dart';
 import 'package:meshtastic_flutter/proto-autogen/mesh.pb.dart';
 import 'package:meshtastic_flutter/protocol/app_from_radio_handler.dart';
 import 'package:meshtastic_flutter/model/tab_definition.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:tuple/tuple.dart';
@@ -72,23 +72,19 @@ List<TabDefinition> allTabDefinitions = <TabDefinition>[
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Map<Permission, PermissionStatus> statuses = await [
-    Permission.bluetooth,
-    Permission.location,
-  ].request();
-  print("Permission status: " + statuses[Permission.location].toString());
 
-  final _logger = Logger(
+
+  final _logger = Logger_orig.Logger(
     filter: null, // Use the default LogFilter (-> only log in debug mode)
     output: null, // Use the default LogOutput (-> send everything to console);
-    printer: PrettyPrinter(
-        methodCount: 0, // number of method calls to be displayed
-        errorMethodCount: 8, // number of method calls if stacktrace is provided
-        lineLength: 120, // width of the output
-        colors: true, // Colorful log messages
-        printEmojis: true, // Print an emoji for each log message
-        printTime: false // Should each log print contain a timestamp
-        ),
+    printer: Logger_orig.PrettyPrinter(
+      methodCount: 0, // number of method calls to be displayed
+      errorMethodCount: 8, // number of method calls if stacktrace is provided
+      lineLength: 120, // width of the output
+      colors: true, // Colorful log messages
+      printEmojis: true, // Print an emoji for each log message
+      dateTimeFormat: DateTimeFormat.dateAndTime
+    ),
   );
 
   final MeshDataPacketQueue _radioCmdQueue = MeshDataPacketQueue();
@@ -172,16 +168,25 @@ class MeshtasticApp extends StatelessWidget {
       color: Colors.blue,
       theme: ThemeData(
         textTheme:
-            TextTheme(caption: TextStyle(color: Colors.black38), subtitle2: TextStyle(color: Colors.black54), headline6: TextStyle(color: Colors.black87)),
+            TextTheme(
+              bodySmall: TextStyle(color: Colors.black38), 
+              titleSmall: TextStyle(color: Colors.black54), 
+              titleLarge: TextStyle(color: Colors.black87)),
         primarySwatch: Colors.blue,
         brightness: Brightness.light,
+        platform: TargetPlatform.linux,
       ),
       darkTheme: ThemeData(
         textTheme:
-            TextTheme(caption: TextStyle(color: Colors.white38), subtitle2: TextStyle(color: Colors.white54), headline6: TextStyle(color: Colors.white70)),
+            TextTheme(
+              bodySmall: TextStyle(color: Colors.white38), 
+              titleSmall: TextStyle(color: Colors.white54), 
+              titleLarge: TextStyle(color: Colors.white70),
+            ),
         primarySwatch: Colors.deepPurple,
-        accentColor: Colors.deepPurple,
+        hintColor: Colors.deepPurple,
         brightness: Brightness.dark,
+        platform: TargetPlatform.linux,
       ),
       home: HomePage(),
     );
@@ -206,7 +211,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin<HomeP
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance?.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
 
     _faders = allTabDefinitions.map<AnimationController>((TabDefinition destination) {
       return AnimationController(vsync: this, duration: Duration(milliseconds: 200));
@@ -218,7 +223,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin<HomeP
 
   @override
   void dispose() {
-    WidgetsBinding.instance?.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
 
     for (AnimationController controller in _faders) controller.dispose();
     _hide.dispose();
@@ -239,6 +244,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin<HomeP
         break;
       case AppLifecycleState.resumed:
         break;
+      default: AppLifecycleState.paused;
     }
     print('AppLifecycleState state:  $state');
   }

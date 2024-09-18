@@ -1,0 +1,11 @@
+{
+  "configurations": [
+    {
+      "name": "Flutter Aurora OS Dart Debug",
+      "type": "dart",
+      "request": "attach",
+      "vmServiceUri": "http://127.0.0.1:36675/hhORDXEcz8o=/",
+      "program": "lib/main.dart"
+    }
+  ]
+}

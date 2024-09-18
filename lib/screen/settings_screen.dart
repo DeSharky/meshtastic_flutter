@@ -27,15 +27,15 @@ class SettingsScreen extends StatelessWidget {
           ),
           backgroundColor: tabDefinition.backgroundColor,
           body: SettingsList(
-            backgroundColor: tabDefinition.backgroundColor,
             sections: [
               SettingsSection(
-                title: 'Bluetooth',
+                title: Text('Bluetooth'),
                 tiles: [
                   SettingsTile.switchTile(
-                    title: 'Enable bluetooth',
+                    title: Text('Enable bluetooth'),
                     leading: Icon(Icons.bluetooth),
-                    switchValue: settingsModel.bluetoothEnabled,
+                    initialValue: settingsModel.bluetoothEnabled,
+                    enabled: settingsModel.bluetoothEnabled,
                     onToggle: (bool newValue) async {
                       settingsModel.setBluetoothEnabled(newValue);
                       if (newValue == true && settingsModel.bluetoothDeviceId == "Unknown") {
@@ -45,9 +45,9 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
                   SettingsTile(
-                    title: 'Device',
+                    title: Text('Device'),
                     enabled: settingsModel.bluetoothEnabled,
-                    subtitle: settingsModel.bluetoothDeviceName + ", " + settingsModel.bluetoothDeviceId,
+                    description: Text(settingsModel.bluetoothDeviceName + ", " + settingsModel.bluetoothDeviceId),
                     leading: Icon(Icons.bluetooth),
                     onPressed: (BuildContext ctx) {
                       Navigator.pushNamed(context, "/selectBluetoothDevice");
@@ -55,11 +55,11 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SettingsSection(title: 'User', tiles: [
+              SettingsSection(title: Text('User'), tiles: [
                 SettingsTile(
                   leading: Icon(Icons.person),
-                  title: 'User name',
-                  subtitle: meshDataModel.getMyUser()?.longName ?? "Unknown",
+                  title: Text('User name'),
+                  description: Text(meshDataModel.getMyUser()?.longName ?? "Unknown"),
                   enabled: settingsModel.bluetoothEnabled,
                   onPressed: (BuildContext ctx) {
                     Navigator.pushNamed(context, "/userName");
@@ -135,7 +135,7 @@ class _DeviceListState extends State<_DeviceList> {
     return bleScannerState.discoveredDevices
         .map(
           (device) => SettingsTile(
-            title: device.name + ", " + device.id,
+            title: Text(device.name + ", " + device.id),
             trailing: trailingWidget(device.id, settingsModel.bluetoothDeviceId),
             onPressed: (BuildContext context) async {
               await widget.bleScanner.stopScan();
@@ -152,7 +152,7 @@ class _DeviceListState extends State<_DeviceList> {
   Widget build(BuildContext context) => Consumer2<SettingsModel, BleScannerState>(
       builder: (ctx, settingsModel, bleScannerState, __) => SettingsList(sections: [
             SettingsSection(
-              title: 'Discovered devices',
+              title: Text('Discovered devices'),
               tiles: getTileList(bleScannerState, settingsModel),
             )
           ]));
@@ -219,10 +219,10 @@ class SelectRegionScreen extends StatelessWidget {
   Widget build(BuildContext context) => Consumer<SettingsModel>(
       builder: (ctx, settingsModel, __) => SettingsList(sections: [
             SettingsSection(
-                title: 'Region',
+                title: Text('Region'),
                 tiles: Constants.regionCodes.entries
                     .map((regionCode) => SettingsTile(
-                        title: regionCode.value,
+                        title: Text(regionCode.value),
                         trailing: trailingWidget(regionCode.key, 0), //settingsModel.regionCode),
                         onPressed: (BuildContext context) async {
                           //settingsModel.setRegionCode(regionCode.key); - no longer exists

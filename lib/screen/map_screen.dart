@@ -15,9 +15,9 @@ import 'package:meshtastic_flutter/mesh_utilities.dart' as MeshUtils;
 
 ///
 class CachedTileProvider extends TileProvider {
-  const CachedTileProvider();
+  CachedTileProvider();
   @override
-  ImageProvider getImage(Coords<num> coords, TileLayerOptions options) {
+  ImageProvider getImage(TileCoordinates coords, TileLayer options) {
     return CachedNetworkImageProvider(
       getTileUrl(coords, options),
       //Now you can set options that determine how the image gets cached via whichever plugin you use.
@@ -132,26 +132,36 @@ class _MapScreenState extends State<MapScreen> {
           body: Center(
               child: FlutterMap(
                   options: MapOptions(
-                    interactiveFlags: InteractiveFlag.all & ~InteractiveFlag.rotate, // disable map rotation
-                    center: _handsetPosition,
-                    zoom: 13.0,
+                    // disable map rotation
+                    interactionOptions: InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                    initialCenter: _handsetPosition,
+                    initialZoom: 13.0,
                     minZoom: 6,
                     maxZoom: 18,
                   ),
-                  layers: [
-                TileLayerOptions(
-                    urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", subdomains: ['a', 'b', 'c'], tileProvider: const CachedTileProvider()),
-                MarkerLayerOptions(
-                    markers: meshDataModel
+                  children: [
+                    TileLayer(
+                      urlTemplate: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", 
+                      subdomains: ['a', 'b', 'c'], 
+                      tileProvider: CachedTileProvider(),
+                    ),
+                    MarkerLayer(markers: meshDataModel
                         .getMeshNodeIterable()
                         .map((MeshNode mn) => Marker(
                               width: 140, // TODO: how to make width and height dynamic (i.e., based on size of font, length of label)
                               height: 35,
                               point: meshDataModel.getPosition(mn.nodeNum)?.getLatLng() ?? LatLng(0,0), // TODO: fix this - perhaps only iterate over nodes for which there exists a position
                               //builder: (ctx) => Icon(Icons.location_on, color: Colors.red, size: 30),
-                              builder: (ctx) => buildSpeechBubble(meshDataModel.getUser(mn.userId)?.longName ?? "Unknown"),
-                              anchorPos: AnchorPos.align(AnchorAlign.top),
+                              child: ColoredBox(
+                                color: Colors.lightBlue,
+                                child: Align(
+                                  alignment: Alignment.centerRight,
+                                  child: Text('-->'),
+                                ),
+                              ),
+                              alignment: Alignment.topCenter,
                             ))
-                        .toList())
-              ]))));
+                        .toList()),
+                  ],
+                  ))));
 }
