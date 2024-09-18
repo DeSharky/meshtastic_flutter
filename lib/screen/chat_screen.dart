@@ -199,7 +199,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                           _chatEditCtrl.clear();
                                           scrollToEnd(); // scroll to the last message in the list
                                         },
-                                        child: const Text('Send',style: TextStyle(color: Colors.red),),
+                                        child: const Text('Send'),
                                       ))
                             ])))
                   ])
